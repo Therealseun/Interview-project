@@ -1,0 +1,2349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mall of America — Partner Deck</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        /* ---------- RESET & VARIABLES ---------- */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gold: #C9A84C;
+            --gold-light: #E8C97A;
+            --gold-dim: #8A6D2F;
+            --black: #080808;
+            --black2: #0F0F0F;
+            --black3: #161616;
+            --white: #F5F2EC;
+            --muted: #6B6860;
+            --border: rgba(201, 168, 76, 0.18);
+            --font-display: 'Cormorant Garamond', serif;
+            --font-sans: 'DM Sans', sans-serif;
+            --font-impact: 'Bebas Neue', sans-serif;
+            --nav-w: 72px;
+            --transition: 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            background: var(--black);
+            color: var(--white);
+            font-family: var(--font-sans);
+            font-weight: 300;
+            overflow-x: hidden;
+            cursor: none;
+            transition: opacity 0.6s ease;
+        }
+
+        /* ---------- INTRO OVERLAY ---------- */
+        #intro-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease;
+            opacity: 1;
+        }
+        #intro-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #intro-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+        #intro-skip {
+            position: absolute;
+            bottom: 32px;
+            right: 32px;
+            z-index: 10001;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            padding: 12px 28px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s;
+        }
+        #intro-skip:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Hide deck during intro */
+        body.intro-active #main,
+        body.intro-active #nav,
+        body.intro-active .hamburger,
+        body.intro-active footer,
+        body.intro-active #progress-line {
+            opacity: 0;
+            pointer-events: none;
+        }
+        body.intro-finished #main,
+        body.intro-finished #nav,
+        body.intro-finished .hamburger,
+        body.intro-finished footer,
+        body.intro-finished #progress-line {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ---------- PERFORMANCE & ACCESSIBILITY ---------- */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        .marquee-track,
+        .hero-cinematic,
+        .hero-grid,
+        .hero-video-bg video,
+        .hero-video-bg .hero-cinematic {
+            will-change: transform;
+        }
+
+        /* ---------- CUSTOM CURSOR ---------- */
+        #cursor {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.08s, width 0.2s, height 0.2s, background 0.2s;
+            mix-blend-mode: screen;
+        }
+        #cursor-ring {
+            position: fixed;
+            width: 36px;
+            height: 36px;
+            border: 1px solid rgba(201, 168, 76, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: transform 0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94), width 0.3s, height 0.3s;
+        }
+        body:has(a:hover, button:hover, .nav-item:hover) #cursor {
+            width: 14px;
+            height: 14px;
+        }
+        body:has(a:hover, button:hover, .nav-item:hover) #cursor-ring {
+            width: 52px;
+            height: 52px;
+        }
+
+        /* ---------- NAVIGATION ---------- */
+        #nav {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--nav-w);
+            background: rgba(8, 8, 8, 0.92);
+            border-right: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 28px 0;
+            gap: 0;
+            transition: transform 0.3s ease, opacity 0.6s ease;
+        }
+
+        .nav-logo {
+            font-family: var(--font-impact);
+            font-size: 11px;
+            letter-spacing: 0.25em;
+            color: var(--gold);
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            margin-bottom: auto;
+            opacity: 0.85;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            align-items: center;
+            margin-bottom: auto;
+        }
+
+        .nav-item {
+            width: 44px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .nav-item:hover {
+            background: rgba(201, 168, 76, 0.08);
+        }
+        .nav-item.active {
+            background: rgba(201, 168, 76, 0.12);
+        }
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+            pointer-events: none;
+        }
+        .nav-item.active svg,
+        .nav-item:hover svg {
+            opacity: 1;
+        }
+
+        .nav-item::after {
+            content: attr(data-label);
+            position: absolute;
+            left: calc(100% + 12px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(15, 15, 15, 0.95);
+            border: 1px solid var(--border);
+            color: var(--gold);
+            font-family: var(--font-sans);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            padding: 6px 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s;
+            backdrop-filter: blur(8px);
+        }
+        .nav-item:hover::after {
+            opacity: 1;
+        }
+
+        .nav-dot {
+            width: 3px;
+            height: 3px;
+            background: var(--gold);
+            border-radius: 50%;
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .nav-item.active .nav-dot {
+            opacity: 1;
+        }
+
+        .nav-label {
+            display: none;
+        }
+
+        /* Mobile hamburger toggle */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 1100;
+            background: rgba(8, 8, 8, 0.85);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 9px;
+            cursor: pointer;
+            flex-direction: column;
+            gap: 5px;
+            backdrop-filter: blur(12px);
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            transition: opacity 0.6s ease;
+        }
+        .hamburger span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--gold);
+            border-radius: 2px;
+            pointer-events: none;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        .hamburger.open span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+        .hamburger.open span:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger.open span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        /* ---------- PROGRESS LINE ---------- */
+        #progress-line {
+            position: fixed;
+            top: 0;
+            left: var(--nav-w);
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold-dim), var(--gold), var(--gold-light));
+            z-index: 999;
+            width: 0%;
+            transition: width 0.1s linear, opacity 0.6s ease;
+        }
+
+        /* ---------- MAIN LAYOUT ---------- */
+        #main {
+            margin-left: var(--nav-w);
+            min-height: 100vh;
+            opacity: 1;
+            transition: opacity 0.8s ease;
+        }
+
+        .section {
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ---------- HERO ---------- */
+        #hero {
+            background: var(--black);
+            justify-content: center;
+            align-items: center;
+            overflow: visible;
+        }
+
+        .hero-video-bg {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .hero-video-bg video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            opacity: 1;
+            z-index: 1;
+        }
+
+        .hero-cinematic {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 120% 80% at 70% 40%, rgba(201, 168, 76, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 80% 60% at 20% 80%, rgba(20, 10, 50, 0.8) 0%, transparent 60%),
+                linear-gradient(160deg, #0a0a12 0%, #080808 40%, #0d0800 100%);
+            animation: heroShift 12s ease-in-out infinite alternate;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .hero-video-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.25) 60%, rgba(0, 0, 0, 0.55) 100%);
+            z-index: 2;
+        }
+
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(201, 168, 76, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(201, 168, 76, 0.04) 1px, transparent 1px);
+            background-size: 80px 80px;
+            z-index: 1;
+            animation: gridPan 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes heroShift {
+            0% { transform: scale(1.05) translate(0, 0); }
+            100% { transform: scale(1.12) translate(-1%, -1%); }
+        }
+        @keyframes gridPan {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(80px, 80px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            padding: 0 60px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .hero-eyebrow {
+            font-family: var(--font-sans);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.5em;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 32px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 1s 0.3s forwards;
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(72px, 10vw, 140px);
+            font-weight: 300;
+            line-height: 0.9;
+            color: var(--white);
+            margin-bottom: 28px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 1s 0.5s forwards;
+        }
+        .hero-title em {
+            font-style: italic;
+            color: var(--gold);
+        }
+
+        .hero-sub {
+            font-family: var(--font-display);
+            font-size: clamp(14px, 1.8vw, 22px);
+            font-weight: 300;
+            font-style: italic;
+            color: rgba(245, 242, 236, 0.55);
+            margin-bottom: 60px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 1s 0.7s forwards;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 1s 0.9s forwards;
+        }
+
+        .btn-primary,
+        .btn-large-primary {
+            padding: 16px 44px;
+            background: var(--gold);
+            color: var(--black);
+            font-family: var(--font-sans);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-100%);
+            transition: transform 0.3s;
+        }
+        .btn-primary:hover::after {
+            transform: translateX(0);
+        }
+
+        .btn-ghost,
+        .btn-large-ghost {
+            padding: 15px 44px;
+            background: transparent;
+            color: var(--white);
+            font-family: var(--font-sans);
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            border: 1px solid rgba(245, 242, 236, 0.25);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-ghost:hover,
+        .btn-large-ghost:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .btn-large-primary { padding: 20px 60px; font-size: 11px; }
+        .btn-large-ghost { padding: 19px 60px; }
+
+        /* ---------- Hero Stats ---------- */
+        .hero-stats {
+            position: relative;
+            bottom: auto;
+            left: auto;
+            right: auto;
+            z-index: 3;
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            margin-top: 60px;
+            opacity: 0;
+            animation: fadeUp 1s 1.2s forwards;
+        }
+
+        .hero-stat { text-align: center; }
+        .hero-stat-num {
+            font-family: var(--font-impact);
+            font-size: 48px;
+            color: var(--gold);
+            line-height: 1;
+        }
+        .hero-stat-label {
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: 0.3em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 28px;
+            right: 48px;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0;
+            animation: fadeIn 1s 2s forwards;
+        }
+        .scroll-line {
+            width: 60px;
+            height: 1px;
+            background: var(--gold);
+            position: relative;
+            overflow: hidden;
+        }
+        .scroll-line::after {
+            content: '';
+            position: absolute;
+            left: -100%;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--white);
+            animation: scanLine 2s 2.5s ease-in-out infinite;
+        }
+        @keyframes scanLine {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+        .scroll-text {
+            font-size: 9px;
+            letter-spacing: 0.3em;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* ---------- COMMON SECTION STYLES ---------- */
+        .section-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 60px;
+            margin-bottom: 80px;
+        }
+        .section-num {
+            font-family: var(--font-impact);
+            font-size: 120px;
+            color: rgba(201, 168, 76, 0.08);
+            line-height: 1;
+            flex-shrink: 0;
+            margin-top: -20px;
+        }
+        .section-heading-group { flex: 1; }
+        .section-eyebrow {
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: 0.45em;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .section-eyebrow::before {
+            content: '';
+            width: 32px;
+            height: 1px;
+            background: var(--gold);
+        }
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(40px, 5vw, 72px);
+            font-weight: 300;
+            line-height: 1.05;
+            color: var(--white);
+        }
+        .section-title em {
+            font-style: italic;
+            color: var(--gold);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s, transform 0.8s;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ---------- STATS GRID ---------- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            margin-bottom: 80px;
+        }
+        .stat-card {
+            background: var(--black2);
+            padding: 48px 40px;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.3s;
+        }
+        .stat-card:hover { background: var(--black3); }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s;
+        }
+        .stat-card:hover::before { transform: translateX(0); }
+        .stat-number {
+            font-family: var(--font-impact);
+            font-size: 56px;
+            color: var(--gold);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        .stat-unit {
+            font-family: var(--font-display);
+            font-size: 28px;
+            color: var(--gold-dim);
+            font-style: italic;
+        }
+        .stat-label {
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.25em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .stat-desc {
+            font-size: 13px;
+            color: rgba(245, 242, 236, 0.4);
+            line-height: 1.5;
+        }
+
+        .why-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+        .why-visual { position: relative; height: 480px; }
+        .why-map-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(201, 168, 76, 0.12) 0%, transparent 65%), var(--black3);
+            border: 1px solid var(--border);
+        }
+        .map-rings {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .map-ring {
+            position: absolute;
+            border: 1px solid rgba(201, 168, 76, 0.15);
+            border-radius: 50%;
+            animation: pulse 3s ease-in-out infinite;
+        }
+        .map-ring:nth-child(1) { width: 80px; height: 80px; }
+        .map-ring:nth-child(2) { width: 160px; height: 160px; animation-delay: 0.4s; }
+        .map-ring:nth-child(3) { width: 260px; height: 260px; animation-delay: 0.8s; }
+        .map-ring:nth-child(4) { width: 380px; height: 380px; animation-delay: 1.2s; }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+        .map-center {
+            width: 16px;
+            height: 16px;
+            background: var(--gold);
+            border-radius: 50%;
+            z-index: 1;
+            box-shadow: 0 0 30px rgba(201, 168, 76, 0.6);
+            animation: glow 2s ease-in-out infinite;
+        }
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(201, 168, 76, 0.4); }
+            50% { box-shadow: 0 0 50px rgba(201, 168, 76, 0.8), 0 0 80px rgba(201, 168, 76, 0.3); }
+        }
+        .map-label {
+            position: absolute;
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+        .map-label-1 { top: 30%; right: 10%; }
+        .map-label-2 { top: 60%; right: 5%; }
+        .map-label-3 { bottom: 20%; left: 10%; }
+
+        .why-text h3 {
+            font-family: var(--font-display);
+            font-size: 34px;
+            font-weight: 300;
+            line-height: 1.2;
+            margin-bottom: 28px;
+        }
+        .why-text h3 em { font-style: italic; color: var(--gold); }
+        .why-text p {
+            font-size: 14px;
+            line-height: 1.8;
+            color: rgba(245, 242, 236, 0.55);
+            margin-bottom: 20px;
+        }
+        .feature-list {
+            list-style: none;
+            margin-top: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .feature-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            font-size: 13px;
+            color: rgba(245, 242, 236, 0.7);
+        }
+        .feature-list li::before {
+            content: '';
+            width: 20px;
+            height: 1px;
+            background: var(--gold);
+            flex-shrink: 0;
+            margin-top: 10px;
+        }
+
+        /* ---------- RETAIL CARDS ---------- */
+        .retail-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            background: var(--border);
+            margin-top: 60px;
+        }
+        .retail-card {
+            background: var(--black2);
+            position: relative;
+            overflow: hidden;
+            height: 380px;
+            cursor: pointer;
+        }
+        .retail-card-bg {
+            position: absolute;
+            inset: 0;
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .retail-card:hover .retail-card-bg { transform: scale(1.05); }
+        .retail-card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 60%);
+            z-index: 1;
+        }
+        .retail-card-icon {
+            position: absolute;
+            top: 36px;
+            right: 36px;
+            z-index: 2;
+            width: 48px;
+            height: 48px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .retail-card-icon svg { width: 22px; height: 22px; }
+        .retail-card-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 2;
+            padding: 36px;
+            transform: translateY(20px);
+            transition: transform 0.4s;
+        }
+        .retail-card:hover .retail-card-content { transform: translateY(0); }
+        .retail-card-tag {
+            font-size: 8px;
+            font-weight: 500;
+            letter-spacing: 0.35em;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .retail-card-title {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+        .retail-card-desc {
+            font-size: 12px;
+            color: rgba(245, 242, 236, 0.5);
+            line-height: 1.6;
+            opacity: 0;
+            transition: opacity 0.4s 0.1s;
+        }
+        .retail-card:hover .retail-card-desc { opacity: 1; }
+        .retail-card-stat {
+            margin-top: 16px;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.4s 0.15s;
+        }
+        .retail-card:hover .retail-card-stat { opacity: 1; }
+        .retail-card-stat-num {
+            font-family: var(--font-impact);
+            font-size: 40px;
+            color: var(--gold);
+        }
+        .retail-card-stat-label {
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .tenants-marquee {
+            margin-top: 60px;
+            overflow: hidden;
+            padding: 24px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        .tenants-marquee::before,
+        .tenants-marquee::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 120px;
+            z-index: 2;
+        }
+        .tenants-marquee::before {
+            left: 0;
+            background: linear-gradient(90deg, var(--black), transparent);
+        }
+        .tenants-marquee::after {
+            right: 0;
+            background: linear-gradient(-90deg, var(--black), transparent);
+        }
+        .marquee-track {
+            display: flex;
+            gap: 60px;
+            animation: marquee 30s linear infinite;
+            width: max-content;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .marquee-item {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-style: italic;
+            font-weight: 300;
+            color: rgba(245, 242, 236, 0.2);
+            white-space: nowrap;
+            transition: color 0.3s;
+        }
+        .marquee-item:hover { color: var(--gold); }
+
+        /* ---------- ENTERTAINMENT ---------- */
+        .entertainment-hero {
+            position: relative;
+            height: 520px;
+            margin: 60px -80px;
+            overflow: hidden;
+        }
+        .ent-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 70% 90% at 30% 50%, rgba(201, 168, 76, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 80% at 80% 50%, rgba(30, 20, 80, 0.5) 0%, transparent 60%),
+                linear-gradient(135deg, #0a080f 0%, #0d0808 100%);
+        }
+        .ent-attractions {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+        }
+        .attr-card {
+            height: 380px;
+            flex: 1;
+            border-right: 1px solid rgba(201, 168, 76, 0.08);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: flex 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .attr-card:last-child { border-right: none; }
+        .attr-card:hover { flex: 2.5; }
+        .attr-card:hover .attr-content { opacity: 1; }
+        .attr-card:hover .attr-num { opacity: 0.04; }
+        .attr-bg {
+            position: absolute;
+            inset: 0;
+            transition: transform 0.6s;
+        }
+        .attr-card:hover .attr-bg { transform: scale(1.05); }
+        .attr-num {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-family: var(--font-impact);
+            font-size: 80px;
+            color: var(--gold);
+            opacity: 0.08;
+            line-height: 1;
+            transition: opacity 0.4s;
+            z-index: 1;
+        }
+        .attr-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 32px 28px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: 2;
+        }
+        .attr-icon {
+            width: 44px;
+            height: 44px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .attr-icon svg { width: 20px; height: 20px; }
+        .attr-title {
+            font-family: var(--font-display);
+            font-size: 26px;
+            font-weight: 300;
+            margin-bottom: 8px;
+        }
+        .attr-desc {
+            font-size: 12px;
+            color: rgba(245, 242, 236, 0.5);
+            line-height: 1.6;
+        }
+        .attr-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: var(--font-impact);
+            font-size: 13px;
+            letter-spacing: 0.2em;
+            color: rgba(245, 242, 236, 0.3);
+            text-transform: uppercase;
+            text-align: center;
+            white-space: nowrap;
+            transition: opacity 0.4s;
+            pointer-events: none;
+        }
+        .attr-card:hover .attr-label { opacity: 0; }
+
+        /* ---------- DINING & LIFESTYLE ---------- */
+        #dining {
+            background: var(--black2);
+            padding: 120px 80px;
+            position: relative;
+        }
+        .dining-showcase {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px;
+            background: var(--border);
+            margin-top: 60px;
+        }
+        .dining-card {
+            background: var(--black3);
+            position: relative;
+            overflow: hidden;
+            height: 500px;
+            cursor: pointer;
+        }
+        .dining-card-bg {
+            position: absolute;
+            inset: 0;
+            transition: transform 0.6s;
+        }
+        .dining-card:hover .dining-card-bg { transform: scale(1.03); }
+        .dining-card-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 48px;
+            background: linear-gradient(to top, rgba(8, 8, 8, 0.95), transparent);
+            z-index: 2;
+        }
+        .dining-card-label {
+            font-size: 8px;
+            font-weight: 500;
+            letter-spacing: 0.4em;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+        .dining-card-title {
+            font-family: var(--font-display);
+            font-size: 40px;
+            font-weight: 300;
+            margin-bottom: 12px;
+        }
+        .dining-card-desc {
+            font-size: 13px;
+            color: rgba(245, 242, 236, 0.5);
+            line-height: 1.7;
+        }
+        .dining-stats {
+            display: flex;
+            gap: 24px;
+            margin-top: 24px;
+        }
+        .dining-stat-num {
+            font-family: var(--font-impact);
+            font-size: 36px;
+            color: var(--gold);
+            line-height: 1;
+        }
+        .dining-stat-label {
+            font-size: 9px;
+            letter-spacing: 0.2em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* ---------- EVENTS ---------- */
+        .events-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: start;
+            margin-top: 60px;
+        }
+        .events-visual { position: relative; }
+        .events-stage {
+            position: relative;
+            height: 460px;
+            background: var(--black3);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .stage-lights {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            overflow: hidden;
+        }
+        .spotlight {
+            position: absolute;
+            top: 0;
+            width: 2px;
+            height: 200px;
+            transform-origin: top center;
+        }
+        .spotlight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -30px;
+            width: 60px;
+            height: 200px;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            background: linear-gradient(180deg, rgba(201, 168, 76, 0.25) 0%, transparent 100%);
+        }
+        .spotlight:nth-child(1) { left: 20%; animation: swingLight 6s ease-in-out infinite; }
+        .spotlight:nth-child(2) { left: 50%; animation: swingLight 5s ease-in-out infinite reverse 1s; }
+        .spotlight:nth-child(3) { left: 80%; animation: swingLight 7s ease-in-out infinite 2s; }
+        @keyframes swingLight {
+            0%, 100% { transform: rotate(-15deg); }
+            50% { transform: rotate(15deg); }
+        }
+        .stage-floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(180deg, transparent 0%, rgba(201, 168, 76, 0.03) 100%);
+            border-top: 1px solid rgba(201, 168, 76, 0.1);
+        }
+        .stage-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+        .stage-title {
+            font-family: var(--font-impact);
+            font-size: 60px;
+            letter-spacing: 0.08em;
+            color: var(--gold);
+            text-shadow: 0 0 60px rgba(201, 168, 76, 0.4);
+            animation: textGlow 3s ease-in-out infinite;
+        }
+        @keyframes textGlow {
+            0%, 100% { text-shadow: 0 0 40px rgba(201, 168, 76, 0.3); }
+            50% { text-shadow: 0 0 80px rgba(201, 168, 76, 0.6), 0 0 120px rgba(201, 168, 76, 0.2); }
+        }
+        .stage-sub {
+            font-size: 10px;
+            letter-spacing: 0.4em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+        .events-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1px;
+            background: var(--border);
+            margin-top: 2px;
+        }
+        .event-metric { background: var(--black2); padding: 24px; }
+        .event-metric-num {
+            font-family: var(--font-impact);
+            font-size: 36px;
+            color: var(--gold);
+            line-height: 1;
+        }
+        .event-metric-label {
+            font-size: 9px;
+            letter-spacing: 0.25em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+        .events-types { display: flex; flex-direction: column; gap: 16px; }
+        .event-type {
+            border: 1px solid var(--border);
+            padding: 28px 32px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .event-type::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--gold);
+            transform: scaleY(0);
+            transition: transform 0.3s;
+        }
+        .event-type:hover {
+            background: rgba(201, 168, 76, 0.04);
+            border-color: rgba(201, 168, 76, 0.4);
+        }
+        .event-type:hover::before { transform: scaleY(1); }
+        .event-type-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .event-type-title { font-family: var(--font-display); font-size: 22px; font-weight: 300; }
+        .event-type-cap { font-family: var(--font-impact); font-size: 28px; color: var(--gold); }
+        .event-type-desc {
+            font-size: 12px;
+            color: rgba(245, 242, 236, 0.45);
+            line-height: 1.6;
+        }
+
+        /* ---------- SPONSORSHIP ---------- */
+        .tiers-layout {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            background: var(--border);
+            margin-top: 60px;
+            position: relative;
+            z-index: 1;
+        }
+        .tier-card {
+            background: var(--black2);
+            padding: 48px 40px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .tier-card:hover { background: #111; }
+        .tier-card.featured {
+            background: linear-gradient(180deg, rgba(201, 168, 76, 0.08) 0%, var(--black2) 100%);
+            border-top: 2px solid var(--gold);
+        }
+        .tier-badge {
+            font-size: 8px;
+            font-weight: 500;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tier-badge.gold { color: var(--gold); }
+        .tier-badge.silver { color: #A8A8A4; }
+        .tier-badge.platinum { color: #E8E6E2; }
+        .tier-badge::before { content: ''; width: 20px; height: 1px; background: currentColor; }
+        .tier-name {
+            font-family: var(--font-display);
+            font-size: 42px;
+            font-weight: 300;
+            font-style: italic;
+            margin-bottom: 20px;
+            line-height: 1;
+        }
+        .tier-price {
+            margin-bottom: 32px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--border);
+        }
+        .tier-price-label {
+            font-size: 9px;
+            letter-spacing: 0.3em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .tier-price-num {
+            font-family: var(--font-impact);
+            font-size: 48px;
+            color: var(--gold);
+            letter-spacing: 0.02em;
+        }
+        .tier-price-period { font-size: 12px; color: var(--muted); font-style: italic; }
+        .tier-features { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+        .tier-features li {
+            font-size: 12px;
+            color: rgba(245, 242, 236, 0.6);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            line-height: 1.4;
+        }
+        .tier-features li::before {
+            content: '';
+            width: 14px;
+            height: 1px;
+            background: var(--gold);
+            flex-shrink: 0;
+            margin-top: 9px;
+        }
+        .audience-bar {
+            margin-top: 80px;
+            padding: 48px;
+            border: 1px solid var(--border);
+            background: var(--black3);
+        }
+        .audience-title {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 300;
+            font-style: italic;
+            margin-bottom: 36px;
+            text-align: center;
+        }
+        .demo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+        .demo-item { text-align: center; }
+        .demo-bar-wrap {
+            height: 80px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+        .demo-bar {
+            width: 32px;
+            background: linear-gradient(to top, var(--gold-dim), var(--gold));
+            border-radius: 2px 2px 0 0;
+            transition: height 0.3s;
+        }
+        .demo-pct { font-family: var(--font-impact); font-size: 28px; color: var(--gold); }
+        .demo-label {
+            font-size: 9px;
+            letter-spacing: 0.2em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* ---------- LEASING ---------- */
+        .leasing-paths {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2px;
+            background: var(--border);
+            margin-top: 60px;
+        }
+        .lease-card {
+            background: var(--black2);
+            padding: 56px 48px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.3s;
+            min-height: 340px;
+            display: flex;
+            flex-direction: column;
+        }
+        .lease-card:hover { background: var(--black3); }
+        .lease-card-num {
+            font-family: var(--font-impact);
+            font-size: 100px;
+            color: rgba(201, 168, 76, 0.06);
+            line-height: 1;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            transition: opacity 0.3s;
+        }
+        .lease-card:hover .lease-card-num { opacity: 0; }
+        .lease-card-tag {
+            font-size: 8px;
+            font-weight: 500;
+            letter-spacing: 0.4em;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .lease-card-tag::before { content: ''; width: 20px; height: 1px; background: var(--gold); }
+        .lease-card-title {
+            font-family: var(--font-display);
+            font-size: 40px;
+            font-weight: 300;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .lease-card-title em { font-style: italic; color: var(--gold); }
+        .lease-card-desc {
+            font-size: 13px;
+            color: rgba(245, 242, 236, 0.45);
+            line-height: 1.7;
+            flex: 1;
+        }
+        .lease-card-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+        .lease-metric-num { font-family: var(--font-impact); font-size: 30px; color: var(--gold); }
+        .lease-metric-label {
+            font-size: 9px;
+            letter-spacing: 0.2em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        /* ---------- CONTACT ---------- */
+        #contact {
+            background: var(--black3);
+            padding: 140px 80px;
+            position: relative;
+            overflow: hidden;
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .contact-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(201, 168, 76, 0.07) 0%, transparent 70%);
+        }
+        .contact-grid-overlay {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(201, 168, 76, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(201, 168, 76, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        .contact-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 800px;
+        }
+        .contact-eyebrow {
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: 0.5em;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 32px;
+        }
+        .contact-title {
+            font-family: var(--font-display);
+            font-size: clamp(48px, 7vw, 96px);
+            font-weight: 300;
+            line-height: 1.0;
+            margin-bottom: 24px;
+        }
+        .contact-title em { font-style: italic; color: var(--gold); }
+        .contact-desc {
+            font-size: 16px;
+            font-family: var(--font-display);
+            font-style: italic;
+            color: rgba(245, 242, 236, 0.45);
+            margin-bottom: 56px;
+            line-height: 1.6;
+        }
+        .contact-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+        .contact-info { display: flex; gap: 60px; justify-content: center; flex-wrap: wrap; }
+        .contact-info-item { text-align: center; }
+        .contact-info-label {
+            font-size: 8px;
+            letter-spacing: 0.4em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .contact-info-value {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-style: italic;
+            color: var(--white);
+        }
+
+        /* ---------- FOOTER ---------- */
+        footer {
+            background: var(--black);
+            border-top: 1px solid var(--border);
+            padding: 40px 80px;
+            margin-left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: opacity 0.6s ease;
+        }
+        .footer-logo { font-family: var(--font-impact); font-size: 28px; letter-spacing: 0.15em; color: var(--gold); }
+        .footer-legal { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; }
+        .footer-links { display: flex; gap: 32px; }
+        .footer-links a {
+            font-size: 9px;
+            letter-spacing: 0.25em;
+            color: var(--muted);
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover { color: var(--gold); }
+
+        /* ---------- MODAL ---------- */
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+        }
+        #modal-overlay.open { display: flex; }
+        #modal {
+            background: var(--black2);
+            border: 1px solid var(--border);
+            max-width: 620px;
+            width: 90%;
+            padding: 60px;
+            position: relative;
+            animation: modalIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #modal-close {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        #modal-close:hover { color: var(--gold); border-color: var(--gold); }
+        .modal-eyebrow {
+            font-size: 9px;
+            letter-spacing: 0.4em;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .modal-title {
+            font-family: var(--font-display);
+            font-size: 36px;
+            font-weight: 300;
+            font-style: italic;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+        .modal-body {
+            font-size: 13px;
+            color: rgba(245, 242, 236, 0.55);
+            line-height: 1.8;
+            margin-bottom: 36px;
+        }
+        .modal-form { display: flex; flex-direction: column; gap: 16px; }
+        .modal-input {
+            background: var(--black3);
+            border: 1px solid var(--border);
+            color: var(--white);
+            font-family: var(--font-sans);
+            font-size: 13px;
+            padding: 14px 18px;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .modal-input:focus { border-color: var(--gold); }
+        .modal-input::placeholder { color: var(--muted); }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 1100px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .why-content { grid-template-columns: 1fr; }
+            .why-visual { height: 320px; }
+            .events-layout { grid-template-columns: 1fr; }
+            .tiers-layout { grid-template-columns: 1fr; }
+            .leasing-paths { grid-template-columns: 1fr; }
+            .demo-grid { grid-template-columns: repeat(2, 1fr); }
+            .dining-showcase { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            #nav {
+                transform: translateX(-100%);
+                width: 240px;
+                padding: 80px 24px 28px;
+                align-items: flex-start;
+                z-index: 1050;
+            }
+            #nav.open { transform: translateX(0); }
+            #nav .nav-logo { writing-mode: horizontal-tb; transform: none; font-size: 16px; margin-bottom: 40px; }
+            #nav .nav-items { flex-direction: column; gap: 0; width: 100%; align-items: stretch; }
+            #nav .nav-item {
+                width: 100%;
+                height: 48px;
+                flex-direction: row;
+                justify-content: flex-start;
+                gap: 14px;
+                padding: 0 16px;
+                border-radius: 6px;
+            }
+            #nav .nav-item svg { width: 20px; height: 20px; }
+            #nav .nav-item::after { display: none; }
+            #nav .nav-dot { position: static; opacity: 0; margin-left: auto; }
+            #nav .nav-item.active .nav-dot { opacity: 1; }
+            .nav-label {
+                display: inline;
+                font-family: var(--font-sans);
+                font-size: 12px;
+                font-weight: 400;
+                letter-spacing: 0.15em;
+                color: var(--white);
+                text-transform: uppercase;
+            }
+            #main { margin-left: 0; }
+            #progress-line { left: 0; }
+            .hamburger { display: flex; }
+            .section { padding: 80px 32px; }
+            .hero-content { padding: 0 32px; }
+            .hero-ctas { gap: 12px; }
+            .hero-stats { gap: 24px; flex-wrap: wrap; margin-top: 40px; }
+            .hero-stat-num { font-size: 36px; }
+            .retail-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .entertainment-hero { margin: 40px -32px; height: auto; }
+            .ent-attractions { flex-direction: column; }
+            .attr-card { flex: auto; width: 100%; height: 200px; }
+            .dining-card { height: 400px; }
+            .leasing-paths { grid-template-columns: 1fr; }
+            .events-layout { grid-template-columns: 1fr; }
+            footer { flex-direction: column; gap: 16px; text-align: center; }
+            .section-header { flex-direction: column; gap: 16px; }
+            .section-num { font-size: 60px; margin-top: 0; }
+        }
+        @media (max-width: 480px) {
+            .hero-ctas button { width: 100%; text-align: center; }
+            .hero-stats { gap: 16px; }
+            .hero-stat-num { font-size: 28px; }
+        }
+        @media (hover: none) {
+            #cursor, #cursor-ring { display: none; }
+            body { cursor: auto; }
+        }
+    </style>
+</head>
+<body class="intro-active">
+
+    <!-- INTRO VIDEO OVERLAY -->
+    <div id="intro-overlay">
+        <video id="intro-video" muted playsinline autoplay>
+            <source src="assets/lv_0_20260506095853.mp4" type="video/mp4">
+        </video>
+        <button id="intro-skip">Skip Intro</button>
+    </div>
+
+    <!-- Hamburger for mobile -->
+    <div class="hamburger" id="hamburger" role="button" aria-label="Toggle navigation menu" tabindex="0">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <!-- CURSOR -->
+    <div id="cursor"></div>
+    <div id="cursor-ring"></div>
+
+    <!-- PROGRESS -->
+    <div id="progress-line"></div>
+
+    <!-- NAV -->
+    <nav id="nav" aria-label="Main navigation">
+        <div class="nav-logo">MOA</div>
+
+        <div class="nav-items">
+            <div class="nav-item active" data-label="Overview" data-target="hero">
+                <div class="nav-dot"></div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                <span class="nav-label">Overview</span>
+            </div>
+            <div class="nav-item" data-label="The Scale" data-target="why">
+                <div class="nav-dot"></div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
+                <span class="nav-label">The Scale</span>
+            </div>
+            <div class="nav-item" data-label="Retail" data-target="retail">
+                <div class="nav-dot"></div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                <span class="nav-label">Retail</span>
+            </div>
+            <div class="nav-item" data-label="Entertainment" data-target="entertainment">
+                <div class="nav-dot"></div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span class="nav-label">Entertainment</span>
+            </div>
+            <div class="nav-item" data-label="Dining" data-target="dining">
+                <div class="nav-dot"></div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                <span class="nav-label">Dining</span>
+            </div>
+            <div class="nav-item" data-label="Events" data-target="events">
+                <div class="nav-dot"></div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span class="nav-label">Events</span>
+            </div>
+            <div class="nav-item" data-label="Sponsorship" data-target="sponsorship">
+                <div class="nav-dot"></div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <span class="nav-label">Sponsorship</span>
+            </div>
+            <div class="nav-item" data-label="Leasing" data-target="leasing">
+                <div class="nav-dot"></div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span class="nav-label">Leasing</span>
+            </div>
+            <div class="nav-item" data-label="Connect" data-target="contact">
+                <div class="nav-dot"></div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.68 15.1 19.79 19.79 0 011.61 6.5 2 2 0 013.6 4.34h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L7.91 12a16 16 0 006 6l.97-.97a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 19.34v-2.42z"/></svg>
+                <span class="nav-label">Connect</span>
+            </div>
+        </div>
+    </nav>
+
+    <div id="main">
+
+        <!-- ===== HERO ===== -->
+        <section class="section" id="hero">
+            <div class="hero-video-bg">
+                <video autoplay muted loop playsinline>
+                    <source src="" type="video/mp4">
+                </video>
+                <div class="hero-cinematic"></div>
+                <div class="hero-grid"></div>
+            </div>
+
+            <div class="hero-content">
+                <p class="hero-eyebrow">Bloomington, Minnesota &nbsp;·&nbsp; Est. 1992 &nbsp;·&nbsp; A Triple Five Group Development</p>
+                <h1 class="hero-title">
+                    Mall of<br><em>America</em>
+                </h1>
+                <p class="hero-sub">The most visited destination in the Western Hemisphere</p>
+                <div class="hero-ctas">
+                    <button class="btn-primary" onclick="openModal('leasing')">Explore Leasing</button>
+                    <button class="btn-ghost" onclick="openModal('sponsor')">Sponsorship Inquiry</button>
+                    <button class="btn-ghost" onclick="openModal('events')">Book an Event</button>
+                </div>
+            </div>
+
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-num">40M+</div>
+                    <div class="hero-stat-label">Annual Visitors</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-num">5.6M</div>
+                    <div class="hero-stat-label">Square Feet</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-num">520+</div>
+                    <div class="hero-stat-label">Retail Stores</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-num">$2B+</div>
+                    <div class="hero-stat-label">Annual Sales</div>
+                </div>
+            </div>
+
+            <div class="scroll-indicator">
+                <div class="scroll-line"></div>
+                <span class="scroll-text">Explore</span>
+            </div>
+        </section>
+
+        <!-- ===== WHY MOA ===== -->
+        <section class="section" id="why" style="padding: 120px 80px;">
+            <div class="section-header reveal">
+                <div class="section-num">01</div>
+                <div class="section-heading-group">
+                    <p class="section-eyebrow">The Opportunity</p>
+                    <h2 class="section-title">Not a mall.<br><em>A destination.</em></h2>
+                </div>
+            </div>
+
+            <div class="stats-grid reveal">
+                <div class="stat-card">
+                    <div class="stat-number">40<span class="stat-unit">M+</span></div>
+                    <div class="stat-label">Annual Visitors</div>
+                    <div class="stat-desc">More than the populations of NYC, LA, and Chicago combined.</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$2.4<span class="stat-unit">B</span></div>
+                    <div class="stat-label">Annual Revenue</div>
+                    <div class="stat-desc">Top-performing commercial destination in North America.</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">60<span class="stat-unit">%</span></div>
+                    <div class="stat-label">Out-of-State Visitors</div>
+                    <div class="stat-desc">The majority travel specifically to experience MOA.</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">500<span class="stat-unit">+</span></div>
+                    <div class="stat-label">Events Per Year</div>
+                    <div class="stat-desc">From major concerts to brand activations.</div>
+                </div>
+            </div>
+
+            <div class="why-content reveal">
+                <div class="why-visual">
+                    <div class="why-map-bg">
+                        <div class="map-rings">
+                            <div class="map-ring"></div>
+                            <div class="map-ring"></div>
+                            <div class="map-ring"></div>
+                            <div class="map-ring"></div>
+                            <div class="map-center"></div>
+                            <div class="map-label map-label-1">Minneapolis Metro<br><span style="color:#C9A84C;font-size:11px;font-family:'Bebas Neue',sans-serif;">3.7M population</span></div>
+                            <div class="map-label map-label-2">Day‑drive radius<br><span style="color:#C9A84C;font-size:11px;font-family:'Bebas Neue',sans-serif;">30M+ residents</span></div>
+                            <div class="map-label map-label-3">MSP Airport<br><span style="color:#C9A84C;font-size:11px;font-family:'Bebas Neue',sans-serif;">5 min away</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="why-text">
+                    <h3>The center of a<br><em>40-million person</em> universe.</h3>
+                    <p>Adjacent to Minneapolis‑Saint Paul International Airport, Mall of America captures national and international visitors who build trips around it.</p>
+                    <ul class="feature-list">
+                        <li>Direct light rail from MSP Airport</li>
+                        <li>Tax‑free shopping on clothing & shoes</li>
+                        <li>2 connected hotels, 1,600+ rooms</li>
+                        <li>2.87M sq ft of leasable retail</li>
+                        <li>Nickelodeon Universe – largest indoor theme park</li>
+                        <li>SEA LIFE Aquarium, iFLY, Crayola Experience</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== RETAIL ===== -->
+        <section class="section" id="retail" style="padding: 120px 80px; background: var(--black);">
+            <div class="section-header reveal">
+                <div class="section-num">02</div>
+                <div class="section-heading-group">
+                    <p class="section-eyebrow">Retail Environment</p>
+                    <h2 class="section-title">Every category.<br><em>Every tier.</em></h2>
+                </div>
+            </div>
+
+            <div class="retail-grid reveal">
+                <div class="retail-card" onclick="openModal('luxury')" style="position: relative; overflow: hidden;">
+                    <div class="retail-card-bg" style="position: absolute; inset: 0; background-image: url('assets/src/LW.webp'); background-size: cover; background-position: center;"></div>
+                    <div class="retail-card-overlay" style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);"></div>
+                    <div class="retail-card-icon" style="position: relative; z-index: 1;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/></svg>
+                    </div>
+                    <div class="retail-card-content" style="position: relative; z-index: 1;">
+                        <div class="retail-card-tag">Premium</div>
+                        <div class="retail-card-title">Luxury Wing</div>
+                        <div class="retail-card-desc">50+ luxury brands in a dedicated elevated environment.</div>
+                        <div class="retail-card-stat"><span class="retail-card-stat-num">$420</span><span class="retail-card-stat-label">Avg. spend / visitor</span></div>
+                    </div>
+                </div>
+                <div class="retail-card" onclick="openModal('flagship')" style="position: relative; overflow: hidden;">
+                    <div class="retail-card-bg" style="position: absolute; inset: 0; background-image: url('assets/src/FF.webp'); background-size: cover; background-position: center;"></div>
+                    <div class="retail-card-overlay" style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);"></div>
+                    <div class="retail-card-icon" style="position: relative; z-index: 1;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    </div>
+                    <div class="retail-card-content" style="position: relative; z-index: 1;">
+                        <div class="retail-card-tag">Flagship</div>
+                        <div class="retail-card-title">Flagship Formats</div>
+                        <div class="retail-card-desc">25,000–100,000+ sq ft anchor opportunities.</div>
+                        <div class="retail-card-stat"><span class="retail-card-stat-num">12</span><span class="retail-card-stat-label">Anchor tenants</span></div>
+                    </div>
+                </div>
+                <div class="retail-card" onclick="openModal('popup')" style="position: relative; overflow: hidden;">
+                    <div class="retail-card-bg" style="position: absolute; inset: 0; background-image: url('assets/src/PU.webp'); background-size: cover; background-position: center;"></div>
+                    <div class="retail-card-overlay" style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);"></div>
+                    <div class="retail-card-icon" style="position: relative; z-index: 1;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                    </div>
+                    <div class="retail-card-content" style="position: relative; z-index: 1;">
+                        <div class="retail-card-tag">Pop-Up</div>
+                        <div class="retail-card-title">Pop-Up Platform</div>
+                        <div class="retail-card-desc">Flexible high-traffic short-term activation sites.</div>
+                        <div class="retail-card-stat"><span class="retail-card-stat-num">30+</span><span class="retail-card-stat-label">Pop-up sites</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tenants-marquee reveal">
+                <div class="marquee-track">
+                    <span class="marquee-item">Apple</span><span class="marquee-item">Louis Vuitton</span><span class="marquee-item">Nordstrom</span><span class="marquee-item">Tesla</span><span class="marquee-item">Nike</span><span class="marquee-item">Zara</span><span class="marquee-item">H&M</span><span class="marquee-item">Tiffany & Co.</span><span class="marquee-item">Coach</span><span class="marquee-item">Microsoft</span><span class="marquee-item">Polo Ralph Lauren</span><span class="marquee-item">Sephora</span><span class="marquee-item">American Girl</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== ENTERTAINMENT ===== -->
+        <section class="section" id="entertainment" style="padding: 120px 0; background: var(--black3);">
+            <div style="padding: 0 80px;">
+                <div class="section-header reveal">
+                    <div class="section-num">03</div>
+                    <div class="section-heading-group">
+                        <p class="section-eyebrow">Attractions & Entertainment</p>
+                        <h2 class="section-title">This is what<br><em>separates us.</em></h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="entertainment-hero reveal">
+                <div class="ent-bg"></div>
+                <div class="ent-attractions">
+                    <div class="attr-card" style="position: relative; overflow: hidden;">
+                        <div class="attr-bg" style="position: absolute; inset: 0; background-image: linear-gradient(to top, rgba(0,0,0,0.7), transparent), url('assets/src/NU.jpg'); background-size: cover; background-position: center; opacity: 0.7;"></div>
+                        <div class="attr-num">01</div>
+                        <div class="attr-label">Nickelodeon Universe</div>
+                        <div class="attr-content" style="position: relative; z-index: 1;">
+                            <div class="attr-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12s1.5-3 4-3 4 3 4 3-1.5 3-4 3-4-3-4-3z"/></svg></div>
+                            <div class="attr-title">Nickelodeon Universe</div>
+                            <div class="attr-desc">7 acres, 27 rides. Largest indoor theme park in the US.</div>
+                        </div>
+                    </div>
+                    <div class="attr-card" style="position: relative; overflow: hidden;">
+                        <div class="attr-bg" style="position: absolute; inset: 0; background-image: linear-gradient(to top, rgba(0,0,0,0.7), transparent), url('assets/src/Aquarium.jpg'); background-size: cover; background-position: center; opacity: 0.7;"></div>
+                        <div class="attr-num">02</div>
+                        <div class="attr-label">SEA LIFE Aquarium</div>
+                        <div class="attr-content" style="position: relative; z-index: 1;">
+                            <div class="attr-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M2 12s4-8 10-8 10 8 10 8-4 8-10 8S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></div>
+                            <div class="attr-title">SEA LIFE Aquarium</div>
+                            <div class="attr-desc">1.3M gallons, 10,000+ sea creatures.</div>
+                        </div>
+                    </div>
+                    <div class="attr-card" style="position: relative; overflow: hidden;">
+                        <div class="attr-bg" style="position: absolute; inset: 0; background-image: linear-gradient(to top, rgba(0,0,0,0.7), transparent), url('assets/src/Skydiving.webp'); background-size: cover; background-position: center; opacity: 0.7;"></div>
+                        <div class="attr-num">03</div>
+                        <div class="attr-label">iFLY Skydiving</div>
+                        <div class="attr-content" style="position: relative; z-index: 1;">
+                            <div class="attr-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+                            <div class="attr-title">iFLY Skydiving</div>
+                            <div class="attr-desc">The thrill of freefall keeps shoppers on-property longer.</div>
+                        </div>
+                    </div>
+                    <div class="attr-card" style="position: relative; overflow: hidden;">
+                        <div class="attr-bg" style="position: absolute; inset: 0; background-image: linear-gradient(to top, rgba(0,0,0,0.7), transparent), url('assets/src/Crayola.webp'); background-size: cover; background-position: center; opacity: 0.7;"></div>
+                        <div class="attr-num">04</div>
+                        <div class="attr-label">Crayola Experience</div>
+                        <div class="attr-content" style="position: relative; z-index: 1;">
+                            <div class="attr-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+                            <div class="attr-title">Crayola Experience</div>
+                            <div class="attr-desc">70,000 sq ft immersive family adventure.</div>
+                        </div>
+                    </div>
+                    <div class="attr-card" style="position: relative; overflow: hidden;">
+                        <div class="attr-bg" style="position: absolute; inset: 0; background-image: linear-gradient(to top, rgba(0,0,0,0.7), transparent), url('assets/src/dining.webp'); background-size: cover; background-position: center; opacity: 0.7;"></div>
+                        <div class="attr-num">05</div>
+                        <div class="attr-label">Dining & Lifestyle</div>
+                        <div class="attr-content" style="position: relative; z-index: 1;">
+                            <div class="attr-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2s-5 2-5 10"/></svg></div>
+                            <div class="attr-title">Dining & Lifestyle</div>
+                            <div class="attr-desc">50+ restaurants keep visitors on-property for full days.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding: 60px 80px 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--border);" class="reveal">
+                <div style="background: var(--black2); padding: 36px;"><div style="font-family: 'Bebas Neue', sans-serif; font-size: 52px; color: var(--gold);">7</div><div style="font-size: 9px; letter-spacing: 0.25em; color: var(--muted);">Acres of theme park</div></div>
+                <div style="background: var(--black2); padding: 36px;"><div style="font-family: 'Bebas Neue', sans-serif; font-size: 52px; color: var(--gold);">27</div><div style="font-size: 9px; letter-spacing: 0.25em; color: var(--muted);">Rides & attractions</div></div>
+                <div style="background: var(--black2); padding: 36px;"><div style="font-family: 'Bebas Neue', sans-serif; font-size: 52px; color: var(--gold);">4.2H</div><div style="font-size: 9px; letter-spacing: 0.25em; color: var(--muted);">Avg. visitor dwell time</div></div>
+            </div>
+        </section>
+
+        <!-- ===== DINING & LIFESTYLE ===== -->
+        <section class="section" id="dining">
+            <div class="section-header reveal">
+                <div class="section-num">04</div>
+                <div class="section-heading-group">
+                    <p class="section-eyebrow">Dining & Lifestyle</p>
+                    <h2 class="section-title">Food as a<br><em>destination.</em></h2>
+                </div>
+            </div>
+            <div class="dining-showcase reveal">
+                <div class="dining-card" onclick="openModal('dining-premium')" style="position: relative; overflow: hidden;">
+                    <div class="dining-card-bg" style="position: absolute; inset: 0; background-image: linear-gradient(to top, rgba(0,0,0,0.75), transparent), url('assets/src/PD.webp'); background-size: cover; background-position: center; opacity: 0.85;"></div>
+                    <div class="dining-card-content" style="position: relative; z-index: 1;">
+                        <div class="dining-card-label">Premium Dining</div>
+                        <div class="dining-card-title">Level 3<br><em>Skyline Restaurants</em></div>
+                        <div class="dining-card-desc">Full-service dining with atrium views. 12 chef-driven concepts that turn lunch into an occasion.</div>
+                        <div class="dining-stats"><div><div class="dining-stat-num">$62</div><div class="dining-stat-label">Avg check</div></div><div><div class="dining-stat-num">4.8</div><div class="dining-stat-label">Avg rating</div></div></div>
+                    </div>
+                </div>
+                <div class="dining-card" onclick="openModal('dining-foodhall')" style="position: relative; overflow: hidden;">
+                    <div class="dining-card-bg" style="position: absolute; inset: 0; background-image: linear-gradient(to top, rgba(0,0,0,0.75), transparent), url('assets/src/NFC.jpg'); background-size: cover; background-position: center; opacity: 0.85;"></div>
+                    <div class="dining-card-content" style="position: relative; z-index: 1;">
+                        <div class="dining-card-label">Food Hall & Casual</div>
+                        <div class="dining-card-title">North Food Court<br><em>40 million served</em></div>
+                        <div class="dining-card-desc">A global culinary crossroads. 38 concepts from grab-and-go to fast-casual.</div>
+                        <div class="dining-stats"><div><div class="dining-stat-num">38</div><div class="dining-stat-label">Concepts</div></div><div><div class="dining-stat-num">50+</div><div class="dining-stat-label">Total restaur.</div></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== EVENTS ===== -->
+        <section class="section" id="events" style="padding: 120px 80px; background: var(--black);">
+            <div class="section-header reveal">
+                <div class="section-num">05</div>
+                <div class="section-heading-group">
+                    <p class="section-eyebrow">Events & Platform</p>
+                    <h2 class="section-title">A global stage.<br><em>40 million witnesses.</em></h2>
+                </div>
+            </div>
+            <div class="events-layout">
+                <div class="events-visual reveal">
+                    <div class="events-stage">
+                        <div class="stage-lights"><div class="spotlight"></div><div class="spotlight"></div><div class="spotlight"></div></div>
+                        <div class="stage-floor"></div>
+                        <div class="stage-text"><div class="stage-title">LIVE</div><div class="stage-sub">Events · Concerts · Activations · Launches</div></div>
+                    </div>
+                    <div class="events-metrics">
+                        <div class="event-metric"><div class="event-metric-num">500+</div><div class="event-metric-label">Events/year</div></div>
+                        <div class="event-metric"><div class="event-metric-num">35K</div><div class="event-metric-label">Max capacity</div></div>
+                        <div class="event-metric"><div class="event-metric-num">12</div><div class="event-metric-label">Distinct venues</div></div>
+                        <div class="event-metric"><div class="event-metric-num">85%</div><div class="event-metric-label">Booking rate</div></div>
+                    </div>
+                </div>
+                <div class="events-types reveal reveal-delay-2">
+                    <div class="event-type" onclick="openModal('concert')"><div class="event-type-header"><div class="event-type-title">Concerts & Live Music</div><div class="event-type-cap">5K–35K</div></div><div class="event-type-desc">Hosted Taylor Swift, Lady Gaga. The Rotunda is a one‑of‑a‑kind performance hub.</div></div>
+                    <div class="event-type" onclick="openModal('brand')"><div class="event-type-header"><div class="event-type-title">Brand Activations</div><div class="event-type-cap">500–10K</div></div><div class="event-type-desc">Pop‑up worlds, product launches, experiential campaigns.</div></div>
+                    <div class="event-type" onclick="openModal('corporate')"><div class="event-type-header"><div class="event-type-title">Corporate & Convention</div><div class="event-type-cap">200–5K</div></div><div class="event-type-desc">Meeting facilities, event production, adjacent hotels.</div></div>
+                    <div class="event-type" onclick="openModal('media')"><div class="event-type-header"><div class="event-type-title">Film & Media</div><div class="event-type-cap">Custom</div></div><div class="event-type-desc">Iconic backdrop for films, commercials, streaming content.</div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SPONSORSHIP ===== -->
+        <section class="section" id="sponsorship" style="padding: 120px 80px; background: var(--black2);">
+            <div class="sponsorship-bg" style="position:absolute; inset:0; background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(201,168,76,0.04) 0%, transparent 60%); pointer-events:none;"></div>
+            <div class="section-header reveal" style="position: relative; z-index: 1;">
+                <div class="section-num">06</div>
+                <div class="section-heading-group">
+                    <p class="section-eyebrow">Brand Partnerships</p>
+                    <h2 class="section-title">Your brand.<br><em>40 million impressions.</em></h2>
+                </div>
+            </div>
+            <div class="tiers-layout reveal" style="position: relative; z-index: 1;">
+                <div class="tier-card"><div class="tier-badge silver">Silver Partner</div><div class="tier-name">Presence</div><div class="tier-price"><div class="tier-price-label">Starting from</div><div class="tier-price-num">$250K</div><div class="tier-price-period">annually</div></div><ul class="tier-features"><li>2 branded display locations</li><li>Digital screen network inclusion</li><li>Seasonal campaign rights</li><li>Co‑branded social content</li><li>2 event naming rights/year</li></ul></div>
+                <div class="tier-card featured"><div class="tier-badge gold">Gold Partner</div><div class="tier-name">Signature</div><div class="tier-price"><div class="tier-price-label">Starting from</div><div class="tier-price-num">$750K</div><div class="tier-price-period">annually</div></div><ul class="tier-features"><li>Category exclusivity</li><li>Premium atrium placement</li><li>6 event activations/year</li><li>Digital + physical takeovers</li><li>VIP hospitality packages</li><li>Named venue option</li><li>Co‑produced media rights</li></ul></div>
+                <div class="tier-card"><div class="tier-badge platinum">Platinum Partner</div><div class="tier-name">Icon</div><div class="tier-price"><div class="tier-price-label">Starting from</div><div class="tier-price-num">$2M+</div><div class="tier-price-period">annually</div></div><ul class="tier-features"><li>Major venue naming rights</li><li>Permanent branded environment</li><li>Unlimited event access</li><li>Full omnichannel integration</li><li>Quarterly insights reporting</li><li>Board‑level relationship</li><li>Custom built‑to‑suit experiences</li></ul></div>
+            </div>
+            <div class="audience-bar reveal" style="position: relative; z-index: 1;">
+                <div class="audience-title">Who you're reaching</div>
+                <div class="demo-grid">
+                    <div class="demo-item"><div class="demo-bar-wrap"><div class="demo-bar" style="height: 70%;"></div></div><div class="demo-pct">68%</div><div class="demo-label">Female</div></div>
+                    <div class="demo-item"><div class="demo-bar-wrap"><div class="demo-bar" style="height: 55%;"></div></div><div class="demo-pct">Median 34</div><div class="demo-label">Age</div></div>
+                    <div class="demo-item"><div class="demo-bar-wrap"><div class="demo-bar" style="height: 80%;"></div></div><div class="demo-pct">$78K</div><div class="demo-label">HH Income</div></div>
+                    <div class="demo-item"><div class="demo-bar-wrap"><div class="demo-bar" style="height: 62%;"></div></div><div class="demo-pct">60%</div><div class="demo-label">Out-of-Market</div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== LEASING ===== -->
+        <section class="section" id="leasing" style="padding: 120px 80px; background: var(--black);">
+            <div class="section-header reveal">
+                <div class="section-num">07</div>
+                <div class="section-heading-group">
+                    <p class="section-eyebrow">Leasing Opportunities</p>
+                    <h2 class="section-title">Find your<br><em>right fit.</em></h2>
+                </div>
+            </div>
+            <div class="leasing-paths reveal">
+                <div class="lease-card" onclick="openModal('luxury-lease')" style="position: relative; overflow: hidden;">
+                    <div style="position: absolute; inset: 0; background-image: linear-gradient(to top, rgba(0,0,0,0.75), transparent), url('assets/src/LF.webp'); background-size: cover; background-position: center; opacity: 0.85;"></div>
+                    <div style="position: relative; z-index: 1;"><div class="lease-card-num">L</div><div class="lease-card-tag">Luxury</div><div class="lease-card-title"><em>Luxury</em> Flagship</div><div class="lease-card-desc">Elevated environment, dedicated service, $420 avg spend.</div><div class="lease-card-metrics"><div><div class="lease-metric-num">$420</div><div class="lease-metric-label">Avg spend</div></div><div><div class="lease-metric-num">50+</div><div class="lease-metric-label">Luxury tenants</div></div></div></div>
+                </div>
+                <div class="lease-card" onclick="openModal('retail-lease')" style="position: relative; overflow: hidden;">
+                    <div style="position: absolute; inset: 0; background-image: linear-gradient(to top, rgba(0,0,0,0.75), transparent), url('assets/src/RA.jpg'); background-size: cover; background-position: center; opacity: 0.85;"></div>
+                    <div style="position: relative; z-index: 1;"><div class="lease-card-num">R</div><div class="lease-card-tag">Mid-Tier Retail</div><div class="lease-card-title">Retail <em>Anchor</em></div><div class="lease-card-desc">500 sq ft to 80,000 sq ft. 98% occupancy.</div><div class="lease-card-metrics"><div><div class="lease-metric-num">400+</div><div class="lease-metric-label">Tenants</div></div><div><div class="lease-metric-num">98%</div><div class="lease-metric-label">Occupancy</div></div></div></div>
+                </div>
+                <div class="lease-card" onclick="openModal('fnb-lease')" style="position: relative; overflow: hidden;">
+                    <div style="position: absolute; inset: 0; background-image: linear-gradient(to top, rgba(0,0,0,0.75), transparent), url('assets/src/DC.jpg'); background-size: cover; background-position: center; opacity: 0.85;"></div>
+                    <div style="position: relative; z-index: 1;"><div class="lease-card-num">F</div><div class="lease-card-tag">Food & Beverage</div><div class="lease-card-title">Dining <em>Concept</em></div><div class="lease-card-desc">50+ operators across three food zones.</div><div class="lease-card-metrics"><div><div class="lease-metric-num">50+</div><div class="lease-metric-label">F&B tenants</div></div><div><div class="lease-metric-num">4.2H</div><div class="lease-metric-label">Dwell time</div></div></div></div>
+                </div>
+                <div class="lease-card" onclick="openModal('popup-lease')" style="position: relative; overflow: hidden;">
+                    <div style="position: absolute; inset: 0; background-image: linear-gradient(to top, rgba(0,0,0,0.75), transparent), url('assets/src/PU.webp'); background-size: cover; background-position: center; opacity: 0.85;"></div>
+                    <div style="position: relative; z-index: 1;"><div class="lease-card-num">P</div><div class="lease-card-tag">Short-Term</div><div class="lease-card-title">Pop-Up <em>Platform</em></div><div class="lease-card-desc">30-day minimum. Ideal for testing concepts.</div><div class="lease-card-metrics"><div><div class="lease-metric-num">30</div><div class="lease-metric-label">Sites</div></div><div><div class="lease-metric-num">30D</div><div class="lease-metric-label">Min term</div></div></div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== CONTACT ===== -->
+        <section class="section" id="contact">
+            <div class="contact-bg"></div>
+            <div class="contact-grid-overlay"></div>
+            <div class="contact-content reveal">
+                <p class="contact-eyebrow">Ready to be part of this</p>
+                <h2 class="contact-title">Let's build<br>something<br><em>iconic.</em></h2>
+                <p class="contact-desc">The world's most visited destination is ready for you.<br>Leasing, sponsoring, or booking — we begin with a conversation.</p>
+                <div class="contact-buttons">
+                    <button class="btn-large-primary" onclick="openModal('leasing')">Inquire About Leasing</button>
+                    <button class="btn-large-ghost" onclick="openModal('sponsor')">Sponsorship Discussion</button>
+                    <button class="btn-large-ghost" onclick="openModal('events')">Book a Venue</button>
+                </div>
+                <div class="contact-info">
+                    <div class="contact-info-item"><div class="contact-info-label">Commercial Leasing</div><div class="contact-info-value">leasing@mallofamerica.com</div></div>
+                    <div class="contact-info-item"><div class="contact-info-label">Sponsorships</div><div class="contact-info-value">partnerships@mallofamerica.com</div></div>
+                    <div class="contact-info-item"><div class="contact-info-label">Events & Venues</div><div class="contact-info-value">events@mallofamerica.com</div></div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-logo">Mall of America</div>
+            <div class="footer-legal">© 2025 Mall of America. Confidential sales presentation.</div>
+            <div class="footer-links"><a href="#">mallofamerica.com</a><a href="#">Media Kit</a><a href="#">Site Map</a></div>
+        </footer>
+    </div>
+
+    <!-- MODAL -->
+    <div id="modal-overlay" onclick="if(event.target===this)closeModal()">
+        <div id="modal">
+            <button id="modal-close" onclick="closeModal()" aria-label="Close modal">✕</button>
+            <div class="modal-eyebrow" id="modal-eyebrow">Inquiry</div>
+            <h3 class="modal-title" id="modal-title">Connect with our team</h3>
+            <p class="modal-body" id="modal-body">Fill in your details and a member of our commercial team will be in touch within 24 hours.</p>
+            <div class="modal-form">
+                <input class="modal-input" type="text" placeholder="Your name" aria-label="Name">
+                <input class="modal-input" type="text" placeholder="Company / Brand" aria-label="Company">
+                <input class="modal-input" type="email" placeholder="Email address" aria-label="Email">
+                <input class="modal-input" type="tel" placeholder="Phone (optional)" aria-label="Phone">
+                <input class="modal-input" type="text" id="modal-type-field" placeholder="Inquiry type" aria-label="Inquiry type">
+                <button class="btn-primary" style="width: 100%; padding: 18px;" onclick="closeModal()">Submit Inquiry</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // --- INTRO VIDEO ---
+            const introOverlay = document.getElementById('intro-overlay');
+            const introVideo = document.getElementById('intro-video');
+            const introSkip = document.getElementById('intro-skip');
+            const body = document.body;
+
+            function hideIntro() {
+                introOverlay.classList.add('hidden');
+                body.classList.remove('intro-active');
+                body.classList.add('intro-finished');
+                // Restart hero animations
+                const heroContent = document.querySelector('.hero-content');
+                const heroStats = document.querySelector('.hero-stats');
+                const scrollIndicator = document.querySelector('.scroll-indicator');
+                [heroContent, heroStats, scrollIndicator].forEach(el => {
+                    if (el) {
+                        el.style.animation = 'none';
+                        el.offsetHeight;
+                        el.style.animation = '';
+                    }
+                });
+                setTimeout(() => {
+                    if (introVideo) {
+                        introVideo.pause();
+                        introVideo.removeAttribute('src');
+                    }
+                }, 1000);
+            }
+            introVideo.addEventListener('ended', hideIntro);
+            introSkip.addEventListener('click', hideIntro);
+            introOverlay.addEventListener('click', (e) => { if (e.target === introOverlay) hideIntro(); });
+            introVideo.addEventListener('error', () => { setTimeout(hideIntro, 500); });
+
+            // --- CURSOR ---
+            const cursor = document.getElementById('cursor');
+            const ring = document.getElementById('cursor-ring');
+            let mx = 0, my = 0, rx = 0, ry = 0;
+            document.addEventListener('mousemove', e => {
+                mx = e.clientX; my = e.clientY;
+                cursor.style.left = mx + 'px';
+                cursor.style.top = my + 'px';
+            });
+            function animateRing() {
+                rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+                ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+                requestAnimationFrame(animateRing);
+            }
+            animateRing();
+
+            // --- MOBILE NAV ---
+            const hamburger = document.getElementById('hamburger');
+            const nav = document.getElementById('nav');
+            function toggleNav() {
+                nav.classList.toggle('open');
+                hamburger.classList.toggle('open');
+            }
+            hamburger.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); toggleNav(); });
+            hamburger.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); toggleNav(); });
+            hamburger.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleNav(); } });
+
+            // --- NAV ITEMS ---
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                const targetId = item.getAttribute('data-target');
+                if (!targetId) return;
+                function handleNavClick(e) {
+                    e.preventDefault(); e.stopPropagation();
+                    const target = document.getElementById(targetId);
+                    if (target) target.scrollIntoView({ behavior: 'smooth' });
+                    nav.classList.remove('open');
+                    hamburger.classList.remove('open');
+                }
+                item.addEventListener('click', handleNavClick);
+                item.addEventListener('touchend', handleNavClick);
+            });
+
+            // --- SCROLL PROGRESS ---
+            const progressLine = document.getElementById('progress-line');
+            const sections = ['hero','why','retail','entertainment','dining','events','sponsorship','leasing','contact'];
+            function updateNav() {
+                const scrollY = window.scrollY + window.innerHeight * 0.4;
+                let active = 0;
+                sections.forEach((id, i) => {
+                    const el = document.getElementById(id);
+                    if (el && el.offsetTop <= scrollY) active = i;
+                });
+                navItems.forEach((item, i) => item.classList.toggle('active', i === active));
+            }
+            window.addEventListener('scroll', () => {
+                const docH = document.documentElement.scrollHeight - window.innerHeight;
+                progressLine.style.width = (window.scrollY / docH) * 100 + '%';
+                updateNav();
+            });
+
+            // --- REVEAL ON SCROLL ---
+            const reveals = document.querySelectorAll('.reveal');
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+            }, { threshold: 0.1 });
+            reveals.forEach(el => observer.observe(el));
+
+            // --- MODAL ---
+            const modalData = {
+                leasing: { eyebrow: 'Leasing Inquiry', title: 'Find your space at MOA', body: 'Our leasing team will match you with the ideal location, size, and terms.' },
+                sponsor: { eyebrow: 'Partnership Inquiry', title: 'Become a brand partner', body: 'Connect with 40 million visitors annually.' },
+                events: { eyebrow: 'Events & Venues', title: 'Book your event at MOA', body: 'From intimate activations to 35,000‑person concerts.' },
+                luxury: { eyebrow: 'Luxury Wing', title: 'Luxury leasing inquiry', body: 'Join 50+ premium brands in MOA\'s dedicated luxury environment.' },
+                flagship: { eyebrow: 'Flagship Retail', title: 'Flagship store inquiry', body: '25,000–100,000+ sq ft opportunities.' },
+                popup: { eyebrow: 'Pop‑Up Platform', title: 'Reserve your pop‑up', body: 'Activate in as little as 30 days.' },
+                concert: { eyebrow: 'Concerts & Live Music', title: 'Book a concert or live event', body: 'The Rotunda accommodates 500–35,000 guests.' },
+                brand: { eyebrow: 'Brand Activations', title: 'Plan your brand activation', body: 'Immersive campaigns in front of 40 million visitors.' },
+                corporate: { eyebrow: 'Corporate Events', title: 'Plan your corporate event', body: 'Meeting rooms, conference spaces, full event production.' },
+                media: { eyebrow: 'Film & Media', title: 'Film & content inquiry', body: 'MOA is an iconic filming destination.' },
+                'luxury-lease': { eyebrow: 'Luxury Leasing', title: 'Luxury flagship inquiry', body: 'Elevated placement within MOA\'s premium wing.' },
+                'retail-lease': { eyebrow: 'Retail Leasing', title: 'Retail leasing inquiry', body: 'From kiosks to anchor stores, we have the space.' },
+                'fnb-lease': { eyebrow: 'Food & Beverage', title: 'F&B concept inquiry', body: 'Bring your dining concept to millions of annual visitors.' },
+                'popup-lease': { eyebrow: 'Pop‑Up Leasing', title: 'Pop‑up leasing inquiry', body: 'Test your concept in front of real volume.' },
+                'dining-premium': { eyebrow: 'Premium Dining', title: 'Skyline restaurant inquiry', body: 'Chef‑driven concepts with atrium views.' },
+                'dining-foodhall': { eyebrow: 'Food Hall', title: 'Food hall leasing', body: 'Join 38 concepts in the North Food Court.' }
+            };
+            window.openModal = function(type) {
+                const data = modalData[type] || modalData.leasing;
+                document.getElementById('modal-eyebrow').textContent = data.eyebrow;
+                document.getElementById('modal-title').textContent = data.title;
+                document.getElementById('modal-body').textContent = data.body;
+                document.getElementById('modal-type-field').value = data.eyebrow;
+                document.getElementById('modal-overlay').classList.add('open');
+                document.body.style.overflow = 'hidden';
+            };
+            window.closeModal = function() {
+                document.getElementById('modal-overlay').classList.remove('open');
+                document.body.style.overflow = '';
+            };
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') window.closeModal(); });
+
+            updateNav();
+        })();
+    </script>
+</body>
+</html>
