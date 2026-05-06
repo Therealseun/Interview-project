@@ -8,7 +8,7 @@ This project replaces traditional static presentations with an immersive, video-
 ---
 
 Live Demo
-
+https://moa-sales-deck-livid.vercel.app/
 
 
 ---
@@ -158,7 +158,6 @@ Option 1 — Run Locally
 
 ```bash
 Clone repository
-git clone https://github.com/your-username/moa-sales-deck.git
-
+git clone https://github.com/Therealseun/Interview-project.git
 # Open index.html in your browser
 -->
